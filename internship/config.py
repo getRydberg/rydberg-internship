@@ -14,7 +14,7 @@ def settings():
         PROFILE_SEED=os.getenv("INTERNSHIP_PROFILE_SEED", str(ROOT / "profile.yaml")),
         AUTH_URL=os.getenv("INTERNSHIP_AUTH_URL", "http://backend-dashboard:8080/auth/me"),
         LOGIN_URL=os.getenv("INTERNSHIP_LOGIN_URL", "/auth/login"),
-        PUBLIC_ORIGIN=os.getenv("INTERNSHIP_PUBLIC_ORIGIN", "https://dashboard.rydberg.app").rstrip("/"),
+        PUBLIC_ORIGIN=os.getenv("INTERNSHIP_PUBLIC_ORIGIN", "https://internship.rydberg.app").rstrip("/"),
         SOURCES=json.loads(os.getenv("INTERNSHIP_SOURCES", json.dumps([DEFAULT_SOURCE, OFFSEASON_SOURCE]))),
         CRAWL_SECONDS=max(60, int(os.getenv("INTERNSHIP_CRAWL_SECONDS", "3600"))),
         DIGEST_HOUR=int(os.getenv("INTERNSHIP_DIGEST_HOUR", "18")),

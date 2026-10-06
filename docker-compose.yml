@@ -16,7 +16,7 @@ x-runtime: &runtime
     INTERNSHIP_AUTH_MODE: ${INTERNSHIP_AUTH_MODE:-name}
     INTERNSHIP_AUTH_URL: ${INTERNSHIP_AUTH_URL:-http://backend-dashboard:8080/auth/me}
     INTERNSHIP_LOGIN_URL: ${INTERNSHIP_LOGIN_URL:-/auth/login}
-    INTERNSHIP_PUBLIC_ORIGIN: ${INTERNSHIP_PUBLIC_ORIGIN:-https://dashboard.rydberg.app}
+    INTERNSHIP_PUBLIC_ORIGIN: ${INTERNSHIP_PUBLIC_ORIGIN:-https://internship.rydberg.app}
     INTERNSHIP_SOURCES: ${INTERNSHIP_SOURCES:-["https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/README.md","https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/README-Off-Season.md"]}
     INTERNSHIP_CRAWL_SECONDS: ${INTERNSHIP_CRAWL_SECONDS:-3600}
     INTERNSHIP_DIGEST_HOUR: ${INTERNSHIP_DIGEST_HOUR:-18}
@@ -34,7 +34,7 @@ services:
       start_period: 15s
     labels:
       - traefik.enable=true
-      - traefik.http.routers.internship.rule=Host(`${INTERNSHIP_HOST:-dashboard.rydberg.app}`) && (Path(`/internship`) || PathPrefix(`/internship/`))
+      - traefik.http.routers.internship.rule=Host(`${INTERNSHIP_HOST:-internship.rydberg.app}`)
       - traefik.http.routers.internship.entrypoints=web
       - traefik.http.routers.internship.priority=100
       - traefik.http.services.internship.loadbalancer.server.port=8080

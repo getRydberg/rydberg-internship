@@ -27,7 +27,10 @@ docker compose -f docker-compose.local.yml up --build -d
 
 This publishes the same local port and starts a scheduled worker. The existing
 `docker-compose.yml` remains the Rydberg module entry point, joins `rydberg-net`,
-and routes `/internship` through Traefik. It defaults to name-based accounts.
+and routes `internship.rydberg.app` through Traefik. Open
+https://internship.rydberg.app; the app redirects to `/internship/`. Override
+`INTERNSHIP_HOST` and `INTERNSHIP_PUBLIC_ORIGIN` to use another hostname.
+It defaults to name-based accounts.
 Set `INTERNSHIP_AUTH_MODE=dashboard` to retain dashboard session authentication.
 
 ## Application workspace
