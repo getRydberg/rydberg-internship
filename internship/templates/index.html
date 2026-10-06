@@ -1,0 +1,35 @@
+{% extends 'base.html' %}{% block content %}
+<div class="page-heading"><div><p class="eyebrow">YOUR NEXT CHAPTER</p><h1>Find your next internship.</h1><p class="muted">Browse opportunities, compare fit, and keep every application together.</p></div>
+<form method="post" action="/internship/refresh"><input type="hidden" name="csrf" value="{{ g.csrf }}"><button>Refresh internships</button></form></div>
+<p class="notice">{% if resume_name %}Matching with <strong>{{ resume_name }}</strong>.{% else %}<a href="/internship/resume">Upload your resume PDF</a> to add resume-based fit scores.{% endif %} Scores show matching skills and preferences; they are not a hiring probability.</p>
+<form class="filters" method="get">
+<label>Search<input name="q" value="{{ request.args.get('q','') }}" placeholder="Role or company" maxlength="200"></label>
+<label>Category<select name="section"><option value="">All categories</option>{% for s in sections %}<option {% if request.args.get('section') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+<label>Country<select name="country"><option value="">All countries</option>{% for code,name in countries.items() %}<option value="{{ code }}" {% if request.args.get('country') == code %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
+<label>US state<select name="state"><option value="">All states</option>{% for code,name in states.items() %}<option value="{{ code }}" {% if request.args.get('state') == code %}selected{% endif %}>{{ name }} ({{ code }})</option>{% endfor %}</select></label>
+<label>Season<select name="season"><option value="">All seasons</option>{% for season in seasons %}<option value="{{ season }}" {% if request.args.get('season') == season %}selected{% endif %}>{{ season|title }}</option>{% endfor %}</select></label>
+<label>Year<select name="year"><option value="">All years</option>{% for year in years %}<option value="{{ year }}" {% if request.args.get('year') == year|string %}selected{% endif %}>{{ year }}</option>{% endfor %}</select></label>
+<label>Program<select name="coop"><option value="">Internships & co-ops</option><option value="1" {% if request.args.get('coop') == '1' %}selected{% endif %}>Co-op</option><option value="0" {% if request.args.get('coop') == '0' %}selected{% endif %}>Internship (not labeled co-op)</option></select></label>
+<label>Workplace<select name="remote"><option value="">All locations</option><option value="1" {% if request.args.get('remote') == '1' %}selected{% endif %}>Remote listed</option></select></label>
+<label>Company<select name="company"><option value="">All companies</option>{% for c in companies %}<option {% if request.args.get('company') == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+<label>Minimum score<input name="score" type="number" step="any" value="{{ request.args.get('score','0') }}"></label>
+<label>Status<select name="status"><option value="">All statuses</option>{% for s in statuses %}<option {% if request.args.get('status') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+<label>Sort<select name="sort"><option value="score">Best fit</option><option value="term" {% if request.args.get('sort') == 'term' %}selected{% endif %}>Internship term (earliest first)</option><option value="first_seen" {% if request.args.get('sort') == 'first_seen' %}selected{% endif %}>Newest discoveries</option><option value="company" {% if request.args.get('sort') == 'company' %}selected{% endif %}>Company A–Z</option></select></label>
+<label>Listings<select name="listing"><option value="open">Open listings</option><option value="all" {% if request.args.get('listing') == 'all' %}selected{% endif %}>Include closed / removed</option></select></label>
+<label>Eligibility<select name="eligible"><option value="1">Matching restrictions</option><option value="0" {% if request.args.get('eligible') == '0' %}selected{% endif %}>Include excluded</option></select></label><button>Filter</button></form>
+<p class="muted">{{ total }} matching opportunities · Page {{ page }}</p>
+<div class="table-wrap"><table><thead><tr><th>Fit</th><th>Company</th><th>Role & term</th><th>Location</th><th>Flags</th><th>Discovered</th><th>Application</th><th>Your status</th></tr></thead><tbody>
+{% for r in roles %}<tr>
+<td data-label="Score"><strong class="score">{{ '%g'|format(r.score) }}</strong><small>{{ r.matched|join(', ') }}</small>{% if not r.eligible %}<small>Excluded: {{ r.excluded|join(', ') }}</small>{% endif %}</td>
+<td data-label="Company">{{ r.company }}</td><td data-label="Role & term">{{ r.role }}<small>{{ r.section }}</small><div class="badges">{% for term in r.terms %}<span class="badge">{{ term }}</span>{% else %}<span class="badge">Term unspecified</span>{% endfor %}<span class="badge">{{ 'Co-op' if r.is_coop else 'Internship' }}</span></div></td>
+<td data-label="Location">{% for loc in r.locations %}<div>{{ loc }}</div>{% endfor %}</td>
+<td data-label="Flags">{% for flag, active in r.flags.items() %}{% if active %}<small>{{ flag|replace('_',' ') }}</small>{% endif %}{% endfor %}{% if r.gone %}<small>Gone from source</small>{% elif r.closed_at %}<small>Closed</small>{% endif %}</td>
+<td data-label="Age"><time datetime="{{ r.first_seen }}">{{ r.first_seen[:10] }}</time><small>First seen (UTC)</small><small>Source age: {{ r.source_age }}</small></td>
+<td data-label="Application"><a href="/internship/roles/{{ r.id }}/application">Application workspace →</a>{% if r.apply_url %}<small><a href="{{ r.apply_url }}" target="_blank" rel="noopener noreferrer">Employer form ↗</a></small>{% endif %}</td>
+<td data-label="Your status"><form method="post" action="/internship/roles/{{ r.id }}"><input type="hidden" name="csrf" value="{{ g.csrf }}">
+<label class="sr-only" for="status-{{ r.id }}">Status for {{ r.role }}</label><select id="status-{{ r.id }}" name="status">{% for s in statuses %}<option {% if r.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+<details><summary>Notes{% if r.notes %} •{% endif %}</summary><label class="sr-only" for="notes-{{ r.id }}">Notes</label><textarea id="notes-{{ r.id }}" name="notes" maxlength="10000" rows="3">{{ r.notes }}</textarea>{% if r.applied_at %}<small>Applied {{ r.applied_at[:10] }}</small>{% endif %}</details><button>Save</button></form></td>
+</tr>{% else %}<tr><td colspan="8">No roles match these filters yet. Check your profile and source status below.</td></tr>{% endfor %}
+</tbody></table></div><nav class="pages">{% if prev %}<a href="{{ prev }}">← Previous</a>{% endif %}<span>Page {{ page }}</span>{% if next %}<a href="{{ next }}">Next →</a>{% endif %}</nav>
+<details><summary>Source status</summary>{% for s in sources %}<p>{{ s.url }}<br>Last success: {{ s.last_success or 'Never' }} · {{ s.role_count or 0 }} roles{% if s.last_error %}<br>Error: {{ s.last_error }}{% endif %}</p>{% else %}<p>Waiting for the first scheduled crawl.</p>{% endfor %}</details>
+{% endblock %}

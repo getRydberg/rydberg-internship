@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}
+<p class="eyebrow">MAKE IT PERSONAL</p><h1>Your resume, your fit.</h1>
+<p class="muted">Upload a resume PDF to score internships against your skills. Matching uses listing titles and categories, alongside your saved preferences.</p>
+{% if error %}<p class="notice" role="alert">{{ error }}</p>{% endif %}
+<form class="panel" method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="{{ g.csrf }}">
+<label for="resume">Resume PDF (up to 5 MiB, 20 pages)</label><input type="file" id="resume" name="resume" accept="application/pdf,.pdf" required>
+<p class="muted">Choose a PDF with selectable text. Only extracted text and the filename are stored.</p><button>Upload & update fit scores</button></form>
+{% if resume.resume_filename %}<section class="panel"><h2>{{ resume.resume_filename }}</h2>
+<p>Detected skills</p><div class="badges">{% for skill in skills %}<span class="badge">{{ skill }}</span>{% else %}<p>No matching skills detected yet. You can add keywords in your matching preferences.</p>{% endfor %}</div>
+<details><summary>Review extracted text</summary><pre class="resume-text">{{ resume.resume_text }}</pre></details>
+<form method="post"><input type="hidden" name="csrf" value="{{ g.csrf }}"><button class="subtle" name="action" value="remove">Remove resume</button></form></section>{% endif %}
+<a href="/internship/">Browse internships →</a>{% endblock %}

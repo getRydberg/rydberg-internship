@@ -1,0 +1,18 @@
+terms:
+  firmware: 3
+  security: 3
+  rust: 2
+  embedded: 2
+companies:
+  prefer: [AMD, Intel, NVIDIA, Qualcomm, Marvell]
+locations:
+  prefer: [NYC, Secaucus, Santa Clara]
+  exclude_countries: [Canada]
+exclude_terms: [sales, marketing]
+min_score: 4
+require_flags_absent: [advanced_degree]
+company_boost: 2
+location_boost: 1
+notifications:
+  mode: immediate # immediate or digest (daily, UTC)
+  backends: [] # ntfy, smtp, webhook; configured by the operator

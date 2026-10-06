@@ -1,0 +1,13 @@
+# Copy to notifications.yaml. Destinations are configured per identity, never shared
+# implicitly. Only the host operator edits this file. No credentials/API keys.
+users:
+  friend@example.com:
+    ntfy:
+      url: http://ntfy:80/private-friend-topic
+    smtp:
+      host: mail-relay
+      port: 25
+      from: internship@example.com
+      starttls: true
+    webhook:
+      url: http://notification-receiver:8080/internship

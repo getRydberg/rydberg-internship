@@ -1,0 +1,26 @@
+{% extends 'base.html' %}{% block content %}
+<a href="/internship/">← All internships</a><p class="eyebrow">{{ role.company }}</p><h1>{{ role.role }}</h1>
+<p class="muted">{{ role.section }} · {{ role.locations|join(' · ') }}</p>
+<div class="badges">{% for term in role.terms %}<span class="badge">{{ term }}</span>{% else %}<span class="badge">Term unspecified</span>{% endfor %}<span class="badge">{{ 'Co-op' if role.is_coop else 'Internship' }}</span><span class="badge">Fit score {{ '%g'|format(role.score) }}</span></div>
+<p>Matches: {{ role.matched|join(', ') or 'No matching keywords yet' }}{% if not role.eligible %}<br>Restrictions: {{ role.excluded|join(', ') }}{% endif %}</p>
+{% if role.closed_at or role.gone %}<p class="notice">This listing is closed or has been removed from its source. Your saved draft remains available.</p>{% endif %}
+<p class="notice">Prepare your application here, then copy your reviewed answers into the employer’s form.{% if role.apply_url %} <a href="{{ role.apply_url }}" target="_blank" rel="noopener noreferrer">Open employer form ↗</a>{% endif %}</p>
+<form method="post" class="application-form"><input type="hidden" name="csrf" value="{{ g.csrf }}">
+<section class="panel"><div class="page-heading"><div><h2>Application assistant</h2><p class="muted">Reuse your saved details and previous answers. Review company-specific text before using it.</p></div><button name="action" value="assist">Fill empty fields</button></div>
+<p class="muted">Suggestions list their source. Your answers stay editable, and assistance preserves fields you already filled.</p></section>
+<div class="form-grid">{% for key,label in fields.items() %}<section class="field {% if key in long_fields %}wide{% endif %}">
+<label for="{{ key }}">{{ label }}</label>
+{% if key in long_fields %}<textarea id="{{ key }}" name="{{ key }}" rows="5" maxlength="10000">{{ answers.get(key,'') }}</textarea>
+{% else %}<input id="{{ key }}" name="{{ key }}" value="{{ answers.get(key,'') }}" maxlength="1000" {% if key == 'email' %}autocomplete="email"{% elif key == 'full_name' %}autocomplete="name"{% endif %}>{% endif %}
+{% if key in suggestions %}<details class="suggestion"><summary>Suggested answer · {{ suggestions[key].source }}</summary><p class="answer-preview">{{ suggestions[key].value }}</p><button class="subtle" name="action" value="reuse:{{ key }}">Use this answer</button></details>{% endif %}
+</section>{% endfor %}</div>
+<section class="panel"><h2>Employer question</h2><label for="question">Paste a question from the application</label><textarea id="question" name="question" rows="2" maxlength="1000">{{ answers.get('question','') }}</textarea>
+<button class="subtle" name="action" value="lookup">Find a previous answer</button>
+<label for="answer">Your answer</label><textarea id="answer" name="answer" rows="6" maxlength="10000">{{ answers.get('answer','') }}</textarea>
+{% if 'answer' in suggestions %}<details class="suggestion"><summary>Previous answer · {{ suggestions.answer.source }}</summary><p class="answer-preview">{{ suggestions.answer.value }}</p><button class="subtle" name="action" value="reuse:answer">Use this answer</button></details>{% else %}<p class="muted">Save an answer to reuse it when the same question appears in a future application.</p>{% endif %}</section>
+<section class="panel"><h2>Track your progress</h2><label for="status">Application status</label><select id="status" name="status">{% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s|replace('_',' ') }}</option>{% endfor %}</select>
+<label for="notes">Private notes</label><textarea id="notes" name="notes" rows="3" maxlength="10000">{{ notes }}</textarea>
+<button name="action" value="save">Save application draft</button><p class="muted">Set the status to applied after submitting to the employer.{% if updated_at %} Last saved {{ updated_at[:19]|replace('T',' ') }} UTC.{% endif %}</p></section>
+</form>
+{% if history %}<details><summary>Saved versions ({{ history|length }} most recent)</summary><ul>{% for item in history %}<li>{{ item.saved_at[:19]|replace('T',' ') }} UTC</li>{% endfor %}</ul></details>{% endif %}
+{% endblock %}

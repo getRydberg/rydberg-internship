@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}<p class="eyebrow">LESS RETYPING, MORE APPLYING</p><h1>Your applicant profile</h1>
+<p class="muted">Save your common details once. The application assistant can reuse these in every form.</p>
+<form class="panel" method="post"><input type="hidden" name="csrf" value="{{ g.csrf }}"><input type="hidden" name="action" value="applicant">
+<div class="form-grid">{% for key,label in fields.items() %}<div class="field {% if key in long_fields %}wide{% endif %}"><label for="{{ key }}">{{ label }}</label>
+{% if key in long_fields %}<textarea id="{{ key }}" name="{{ key }}" rows="4" maxlength="10000">{{ details.get(key,'') }}</textarea>{% else %}<input id="{{ key }}" name="{{ key }}" value="{{ details.get(key,'') }}" maxlength="1000">{% endif %}</div>{% endfor %}</div><button>Save applicant details</button></form>
+<h2>Matching preferences</h2>
+<p>Each keyword is counted once. Company boost defaults to 2; each preferred location adds 1. Changes rescore existing roles. Notifications cover newly discovered roles only.</p>
+{% if error %}<p role="alert">{{ error }}</p>{% endif %}
+<form method="post"><input type="hidden" name="csrf" value="{{ g.csrf }}"><label for="profile">Profile YAML</label>
+<textarea class="profile" id="profile" name="profile" maxlength="32768" rows="26" spellcheck="false">{{ raw }}</textarea><button>Save profile</button> <a href="/internship/profile.yaml">Download profile.yaml</a></form>
+<p><a href="/internship/resume">Upload or update your resume PDF</a>. Resume matches add two points for each matching skill or category. Notification backends are configured by your administrator; digest delivery uses UTC.</p>
+<h2>Notification history</h2><ul>{% for d in deliveries %}<li>{{ d.company }} — {{ d.role }} · {{ d.backend }} · {{ d.state }}{% if d.error %} · {{ d.error }}{% endif %}</li>{% else %}<li>No notifications queued.</li>{% endfor %}</ul>{% endblock %}

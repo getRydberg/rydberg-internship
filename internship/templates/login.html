@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% block content %}
+<h1>Your next application, in one place.</h1>
+{% if auth_mode == 'name' %}
+<p>Enter your name to keep your resume, application drafts, and progress together.</p>
+{% if error %}<p role="alert">{{ error }}</p>{% endif %}
+<form class="panel login" method="post" action="/internship/login"><input type="hidden" name="csrf" value="{{ g.csrf }}">
+<label for="name">Your name</label><input id="name" name="name" required maxlength="100" autocomplete="name" autofocus><button>Open my workspace</button></form>
+<p class="muted">Use the same name next time. Names identify workspaces; anyone entering the same name can access that workspace.</p>
+{% else %}<p>Sign in through your Rydberg dashboard, then return to this page.</p><a href="{{ login_url }}">Sign in with the dashboard</a>{% endif %}
+{% endblock %}

@@ -1,0 +1,51 @@
+x-runtime: &runtime
+  build: .
+  image: rydberg-internship:local
+  restart: unless-stopped
+  profiles: [internship]
+  networks: [rydberg-net]
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: [/tmp]
+  volumes:
+    - internship-data:/data
+    - ./config:/config:ro
+  environment: &environment
+    INTERNSHIP_DATABASE: /data/internship.sqlite3
+    INTERNSHIP_AUTH_MODE: ${INTERNSHIP_AUTH_MODE:-name}
+    INTERNSHIP_AUTH_URL: ${INTERNSHIP_AUTH_URL:-http://backend-dashboard:8080/auth/me}
+    INTERNSHIP_LOGIN_URL: ${INTERNSHIP_LOGIN_URL:-/auth/login}
+    INTERNSHIP_PUBLIC_ORIGIN: ${INTERNSHIP_PUBLIC_ORIGIN:-https://dashboard.rydberg.app}
+    INTERNSHIP_SOURCES: ${INTERNSHIP_SOURCES:-["https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/README.md","https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/README-Off-Season.md"]}
+    INTERNSHIP_CRAWL_SECONDS: ${INTERNSHIP_CRAWL_SECONDS:-3600}
+    INTERNSHIP_DIGEST_HOUR: ${INTERNSHIP_DIGEST_HOUR:-18}
+    INTERNSHIP_NOTIFICATION_CONFIG: /config/notifications.yaml
+
+services:
+  backend-internship:
+    <<: *runtime
+    container_name: rydberg-backend-internship
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=5)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 15s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.internship.rule=Host(`${INTERNSHIP_HOST:-dashboard.rydberg.app}`) && (Path(`/internship`) || PathPrefix(`/internship/`))
+      - traefik.http.routers.internship.entrypoints=web
+      - traefik.http.routers.internship.priority=100
+      - traefik.http.services.internship.loadbalancer.server.port=8080
+
+  worker-internship:
+    <<: *runtime
+    container_name: rydberg-worker-internship
+    command: [python, -m, internship.worker]
+
+networks:
+  rydberg-net:
+    external: true
+volumes:
+  internship-data:
